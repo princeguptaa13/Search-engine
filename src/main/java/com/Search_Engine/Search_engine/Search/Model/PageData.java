@@ -1,4 +1,4 @@
-package com.Search_Engine.Search_engine.Crawler.Model;
+package com.Search_Engine.Search_engine.Search.Model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

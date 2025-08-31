@@ -1,47 +1,37 @@
-//package com.Search_Engine.Search_engine.Controller;
-//
-//
-//import com.Search_Engine.Search_engine.Crawler.Engine.DFSCrawler;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.web.bind.annotation.*;
-//
-//@RestController
-//@RequestMapping("/api")
-//public class CrawlController {
-//
-//    @Autowired
-//    private final DFSCrawler dfsCrawler;
-//
-//    public CrawlController(DFSCrawler dfsCrawler1) {
-//        this.dfsCrawler = dfsCrawler1;
-//    }
-//
-//    @PostMapping("/crawl")
-//    public String startCrawl(@RequestParam String url) {
-//        dfsCrawler.crawl(url , 2);  // Trigger the crawl
-//        return "Crawling started for: " + url;
-//    }
-//}
-//
-
 package com.Search_Engine.Search_engine.Controller;
 
 import com.Search_Engine.Search_engine.Crawler.Engine.DFSCrawler;
+import com.Search_Engine.Search_engine.Storage.InMemoryPageStore;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
 public class CrawlController {
 
+    // Trigger crawl via POST /api/crawl?url=https://spring.io&depth=1
     @PostMapping("/crawl")
-    public String startCrawl(@RequestParam String url,
-                             @RequestParam(defaultValue = "2") int depth) {
+    public Map<String, Object> startCrawl(@RequestParam String url,
+                                          @RequestParam(defaultValue = "1") int depth) {
 
-        // Create crawler manually
-        DFSCrawler dfsCrawler = new DFSCrawler(depth, url);
-        dfsCrawler.crawl(url, 0);
+        // Create crawler instance manually
+        DFSCrawler crawler = new DFSCrawler(depth, url);
 
-        return "✅ Crawling started for: " + url;
+        // Start crawling
+        crawler.crawl(url, 0);
+
+        return Map.of(
+                "message", "✅ Crawl finished",
+                "seed", url,
+                "depth", depth,
+                "pagesIndexed", InMemoryPageStore.getAll().size()
+        );
+    }
+
+    // Optional: Check number of pages indexed
+    @GetMapping("/pages/count")
+    public Map<String, Object> pageCount() {
+        return Map.of("pages", InMemoryPageStore.getAll().size());
     }
 }
-

@@ -1,7 +1,7 @@
 package com.Search_Engine.Search_engine.Crawler.Engine;
 
 import com.Search_Engine.Search_engine.Common.Util.HtmlUtils;
-import com.Search_Engine.Search_engine.Crawler.Model.PageData;
+import com.Search_Engine.Search_engine.Search.Model.PageData;
 import com.Search_Engine.Search_engine.Storage.InMemoryPageStore;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -19,7 +19,7 @@ public class DFSCrawler {
     private final int maxDepth;
     private final String baseDomain;
 
-    // Constructor
+    // Constructor with runtime values
     public DFSCrawler(int maxDepth, String startUrl) {
         this.maxDepth = maxDepth;
         this.baseDomain = extractDomain(startUrl);
@@ -30,18 +30,18 @@ public class DFSCrawler {
 
         try {
             Document doc = Jsoup.connect(url)
-                    .userAgent("SearchBot/1.0") // identify crawler
-                    .timeout(5000)
+                    .userAgent("SearchBot/1.0")
+                    .timeout(6000)
                     .get();
 
             String cleanedText = HtmlUtils.cleanText(doc);
             String title = doc.title();
 
-            PageData page = new PageData(url, title, cleanedText, depth);
-            InMemoryPageStore.save(page);
-
+            // Save page
+            InMemoryPageStore.save(new PageData(url, title, cleanedText, depth));
             visited.add(url);
 
+            // Crawl links
             Elements links = doc.select("a[href]");
             for (var link : links) {
                 String absHref = link.absUrl("href");
@@ -51,10 +51,10 @@ public class DFSCrawler {
             }
 
             // Politeness delay
-            Thread.sleep(300);
+            Thread.sleep(200);
 
         } catch (IOException e) {
-            System.err.println("❌ Failed to fetch: " + url + " | Reason: " + e.getMessage());
+            System.err.println("❌ Failed to fetch: " + url + " | " + e.getMessage());
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
@@ -69,10 +69,7 @@ public class DFSCrawler {
         }
     }
 
-    /**
-     * Restrict crawling to same domain
-     */
     private boolean isSameDomain(String url) {
-        return url.contains(baseDomain);
+        return baseDomain.isEmpty() || url.contains(baseDomain);
     }
 }

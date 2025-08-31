@@ -1,7 +1,7 @@
 package com.Search_Engine.Search_engine.Storage;
 
-import com.Search_Engine.Search_engine.Crawler.Model.PageData;
-import java.util.Collection;
+import com.Search_Engine.Search_engine.Search.Model.PageData;
+
 import java.util.concurrent.ConcurrentHashMap;
 
 
